@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-
+import { Comment } from './comments/comments.service';
 
 export interface News {
     id?: number;
@@ -7,6 +7,8 @@ export interface News {
     description: string;
     author: string;
     countView?: number;
+    comments?: Comment[];
+    cover?: string;
 }
 
 export interface NewsDto {
@@ -15,7 +17,7 @@ export interface NewsDto {
     author?: string;
 }
 
-function getRandomInt(min: number, max: number): number {
+export function getRandomInt(min: number = 1, max: number = 99999): number {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min; //Максимум не включается, минимум включается
@@ -27,8 +29,9 @@ export class NewsService {
         id: 1,
         title: 'News #1',
         description: 'Hooray! Our first news!',
-        author: 'None name',
-        countView: 2
+        author: 'Anastasia',
+        countView: 2,
+        cover: 'https://natworld.info/wp-content/uploads/2018/02/Vremja-goda-vesna.jpeg'
     }];
 
     create(news: News): News {
