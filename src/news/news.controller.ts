@@ -78,6 +78,7 @@ export class NewsController {
     create(
         @Body() news: CreateNewsDto,
         @UploadedFile() cover: Express.Multer.File,
+        @Res() response: Response
     ): News {
 
         if (cover?.filename) {

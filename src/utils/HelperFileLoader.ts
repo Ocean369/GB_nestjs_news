@@ -20,6 +20,8 @@ export class HelperFileLoader {
         const fileExtension = originalName[originalName.length - 1];
         const regex = /^(jpg|jpeg|png|gif)$/i;
         acceptFile = regex.test(fileExtension);
+        // if (acceptFile) {
         cb(null, acceptFile);
+        // } else cb(new Error('Неверный формат данных'), acceptFile)
     }
 }
