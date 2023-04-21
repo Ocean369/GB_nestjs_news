@@ -1,5 +1,5 @@
 import { IsString, IsNumber, ValidateIf, IsNotEmpty, IsArray } from 'class-validator';
-import { Reply } from '../comments/comments.service';
+import { Reply } from '../comments.service';
 
 export class EditCommentDto {
     @IsString()

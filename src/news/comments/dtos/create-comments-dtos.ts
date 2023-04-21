@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsString, ValidateIf, IsArray } from 'class-validator';
-import { Reply } from '../comments/comments.service';
+import { Reply } from '../comments.service';
 
 export class CreateCommentDto {
 

@@ -4,8 +4,8 @@ import { Comment, CommentDto } from './comments.service'
 import { Response } from 'express'
 import { renderTemplate } from '../../views/template';
 import { renderCommentsAll } from 'src/views/comments/comments-all';
-import { EditCommentDto } from '../dtos/edit-comments-dtos';
-import { CreateCommentDto } from '../dtos/create-comments-dtos';
+import { EditCommentDto } from './dtos/edit-comments-dtos';
+import { CreateCommentDto } from './dtos/create-comments-dtos';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer'
 import { HelperFileLoader } from '../../utils/HelperFileLoader';
