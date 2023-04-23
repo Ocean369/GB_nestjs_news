@@ -1,0 +1,50 @@
+{{#if idComm}}
+<h1 data-idNews='{{idNews}}' data-idComm='{{idComm}}'>Создание комментария</h1>
+{{else}}
+<h1 data-idNews='{{idNews}}'>Создание комментария</h1>
+{{/if}}
+<form>
+    <div class="mb-3">
+        <label for="messageInput" class="form-label">Текст комментария</label>
+        <textarea class="form-control" name="message" id="messageInput" rows="3"></textarea>
+    </div>
+    <div class="mb-3">
+        <label for="authorInput" class="form-label">Автор</label>
+        <input class="form-control" name='author' id='authorInput'>
+    </div>
+    <div class="form-group">
+        <label for="photo">Аватар</label>
+        <input type="file" class="form-control-file" name="photo" id="photo">
+    </div>
+    <button type="button" class="btn btn-primary" onclick="sendForm()">Создать</button>
+</form>
+
+<script src='https://code.jquery.com/jquery-3.6.4.min.js'></script>
+<script>
+    const idNews = document.querySelector('h1').dataset['idnews'];
+    const idComm = document.querySelector('h1').dataset['idcomm'];
+
+    console.log('idNews', idNews)
+    console.log('idComm', idComm)
+
+    function sendForm() {
+        var data = new FormData($('form')[0]);
+
+        $.ajax({
+            url: `${idComm
+                ? `/comments/api/${idNews}/${idComm}`
+                : `/comments/api/${idNews}`
+                } `,
+            data: data,
+            cache: false,
+            contentType: false,
+            processData: false,
+            method: 'POST',
+            success: function () {
+                alert('Комментарий успешно создан!');
+                window.location.replace(`http://localhost:3000/news/${idNews}/detail`);
+            }
+        })
+    }
+
+</script>

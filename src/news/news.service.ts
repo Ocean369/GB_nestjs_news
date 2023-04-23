@@ -31,7 +31,7 @@ export class NewsService {
         description: 'Hooray! Our first news!',
         author: 'Anastasia',
         countView: 2,
-        cover: 'https://natworld.info/wp-content/uploads/2018/02/Vremja-goda-vesna.jpeg'
+        cover: '/news_static/b77e407f-462e-40db-861f-f703359db154.png'
     }];
 
     create(news: News): News {

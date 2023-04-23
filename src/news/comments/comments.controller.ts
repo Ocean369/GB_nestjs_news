@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, Get, Delete, Put, Res, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Body, Controller, Param, Post, Get, Delete, Put, Res, UseInterceptors, UploadedFile, Render } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { Comment, CommentDto } from './comments.service'
 import { Response } from 'express'
@@ -17,6 +17,17 @@ helperFileLoader.path = PATH_NEWS;
 @Controller('comments')
 export class CommentsController {
     constructor(private readonly commentsService: CommentsService) { }
+
+    @Get('create/comment/:idNews/:idComm?')
+    @Render('create-comments')
+    async createComment(
+        @Param('idNews') idNews: string,
+        @Param('idComm') idComm: string) {
+        if (idComm) return { idNews: idNews, idComm: idComm }
+        else return { idNews: idNews }
+    }
+
+
 
     @Post('/api/:idNews/:idComm?')
     @UseInterceptors(FileInterceptor('photo',
@@ -47,10 +58,15 @@ export class CommentsController {
     }
 
     @Get('api/:idNews')
+    @Render('comment-list')
     get(@Param('idNews') idNews: string) {
         const idNewsInt = parseInt(idNews);
-        return this.commentsService.find(idNewsInt)
+        const comments = this.commentsService.find(idNewsInt)
+        console.log('comments',)
+        return { idNews: idNews, comments }
     }
+
+
 
     @Delete('api/:idNews/:idComm')
     remove(@Param('idNews') idNews: string, @Param('idComm') idComm: string) {
