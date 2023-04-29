@@ -1,3 +1,4 @@
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 const publicPath = './public';
 let path = publicPath;
@@ -14,6 +15,7 @@ export class HelperFileLoader {
     public destinationPath(req, file, cb) {
         cb(null, path);
     }
+
     public fileFilter(req, file, cb) {
         let acceptFile: Boolean;
         const originalName = file.originalname.split('.');

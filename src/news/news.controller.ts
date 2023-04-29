@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Body, Delete, Res, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Delete, Res, UseInterceptors, UploadedFile, Render } from '@nestjs/common';
 import { NewsService, News, NewsDto } from './news.service';
 import { Response } from 'express'
 import { CommentsService } from './comments/comments.service';
@@ -10,6 +10,7 @@ import { EditNewsDto } from './dtos/edit-news-dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer'
 import { HelperFileLoader } from '../utils/HelperFileLoader';
+import { MailService } from 'src/mail/mail.service';
 
 const helperFileLoader = new HelperFileLoader();
 const PATH_NEWS = '/news_static';
@@ -23,7 +24,8 @@ function isEmptyNews(news: NewsDto): Boolean {
 @Controller('news')
 export class NewsController {
     constructor(private readonly newsService: NewsService,
-        private readonly commentsService: CommentsService) { }
+        private readonly commentsService: CommentsService,
+        private readonly mailService: MailService) { }
 
     @Get('/api/details/:id')
     get(@Param('id') id: string): News {
@@ -47,25 +49,43 @@ export class NewsController {
     }
 
     @Get('/all')
-    getAllView(): string {
+    @Render('news-list')
+    getAllView() {
         const news = this.newsService.getAll();
-
-        return renderTemplate(renderNewsAll(news), {
-            title: 'Список новостей',
-            description: 'Самые крутые новости на свете!'
-        });
+        console.log(news)
+        // return renderTemplate(renderNewsAll(news), {
+        //     title: 'Список новостей',
+        //     description: 'Самые крутые новости на свете!'
+        // });
+        return { news, title: 'Список новостей' }
     }
 
     @Get('/:idNews/detail')
-    getNewsWithCommentsView(@Param('idNews') idNews: string): string {
+    @Render('news-id')
+    getNewsWithCommentsView(@Param('idNews') idNews: string) {
         let idNewsInt = parseInt(idNews)
         const news = this.newsService.find(idNewsInt)
         const comments = this.commentsService.find(idNewsInt)
-
-        return renderTemplate(renderNewsPagewithComment(news, comments))
+        // return renderTemplate(renderNewsPagewithComment(news, comments))
+        return { news, comments }
     }
 
-    @Post()
+    @Get('create/news')
+    @Render('create-news')
+    async createNews() {
+        return {}
+    }
+
+    @Get('edit/news/:idNews')
+    @Render('edit-news')
+    async editNews(@Param('idNews') idNews: string) {
+        let idNewsInt = parseInt(idNews);
+        const news = this.newsService.find(idNewsInt);
+        return { news }
+    }
+
+
+    @Post('api')
     @UseInterceptors(FileInterceptor('cover',
         {
             storage: diskStorage({
@@ -75,16 +95,18 @@ export class NewsController {
             fileFilter: helperFileLoader.fileFilter
         }),
     )
-    create(
+    async create(
         @Body() news: CreateNewsDto,
-        @UploadedFile() cover: Express.Multer.File,
-    ): News {
+        @UploadedFile() cover: Express.Multer.File
+    ): Promise<News> {
 
         if (cover?.filename) {
             news.cover = PATH_NEWS + '/' + cover.filename;
         }
 
-        return this.newsService.create(news)
+        const newNews = this.newsService.create(news);
+        await this.mailService.sendNewNewsForAdmin(['bogdanan@tut.by,ledix369@gmail.com'], newNews);
+        return newNews
     }
 
     @Delete('api/:id')
@@ -95,8 +117,26 @@ export class NewsController {
     }
 
     @Post('api/:id')
-    update(@Param('id') id: string, @Body() newsDto: EditNewsDto, @Res() response: Response) {
+    @UseInterceptors(FileInterceptor('cover',
+        {
+            storage: diskStorage({
+                destination: helperFileLoader.destinationPath,
+                filename: helperFileLoader.customFileName,
+            }),
+            fileFilter: helperFileLoader.fileFilter
+        }),
+    )
+    async update(
+        @Param('id') id: string,
+        @Body() newsDto: EditNewsDto,
+        @UploadedFile() cover: Express.Multer.File,
+        @Res() response: Response) {
         let idInt = parseInt(id);
+
+        if (cover?.filename) {
+            newsDto.cover = PATH_NEWS + '/' + cover.filename;
+        }
+
         const news = this.newsService.find(idInt)
         if (!news) {
             response.status(400).json({ message: 'Передан неверный идентификатор.Произвести изменения невозможно.' });
@@ -104,6 +144,9 @@ export class NewsController {
         if (isEmptyNews(newsDto)) {
             response.status(400).json({ message: 'Не обнаруженно данных, в теле запроса.Произвести изменения невозможно.' });
         }
+        const edit = { ...newsDto }
+        console.log('look', edit);
+        await this.mailService.sendEditNewsForAdmin(['ledix369@gmail.com'], newsDto, news)
         response.status(200).json({ message: this.newsService.update(idInt, newsDto) });
 
     }
