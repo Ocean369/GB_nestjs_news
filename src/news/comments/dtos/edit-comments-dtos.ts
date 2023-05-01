@@ -6,14 +6,8 @@ export class EditCommentDto {
     @ValidateIf((o) => o.message)
     message: string;
 
-    @IsString()
-    @ValidateIf((o) => o.author)
-    author: string;
-
     @IsArray()
     @ValidateIf((o) => o.reply)
     reply: Reply[];
 
-    @ValidateIf((o) => o.photo)
-    photo: string;
 }
