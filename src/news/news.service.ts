@@ -1,12 +1,21 @@
-import { Injectable } from '@nestjs/common';
-import { Comment } from './comments/comments.service';
+import { Injectable, forwardRef, Inject } from '@nestjs/common';
+// import { Comment } from './comments/comments.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { NewsEntity } from './news.entity';
+import { CreateNewsDto } from './dtos/create-news-dto';
+import { UsersEntity } from 'src/users/users.entity';
+import { UsersService } from 'src/users/users.service';
+import { CommentsService } from './comments/comments.service';
+import { CreateCommentDto } from './comments/dtos/create-comments-dtos';
+import { CommentsEntity } from './comments/comments.entity';
 
 export interface News {
     id?: number;
     title: string;
     description: string;
-    author: string;
-    countView?: number;
+    // author: string;
+    // countView?: number;
     comments?: Comment[];
     cover?: string;
 }
@@ -14,7 +23,8 @@ export interface News {
 export interface NewsDto {
     title?: string;
     description?: string;
-    author?: string;
+    cover?: string
+    // author?: string;
 }
 
 export function getRandomInt(min: number = 1, max: number = 99999): number {
@@ -25,55 +35,74 @@ export function getRandomInt(min: number = 1, max: number = 99999): number {
 
 @Injectable()
 export class NewsService {
-    private readonly news: News[] = [{
-        id: 1,
-        title: 'News #1',
-        description: 'Hooray! Our first news!',
-        author: 'Anastasia',
-        countView: 2,
-        cover: '/news_static/b77e407f-462e-40db-861f-f703359db154.png'
-    }];
+    constructor(
+        @InjectRepository(NewsEntity)
+        private newsRepository: Repository<NewsEntity>,
+        private userService: UsersService,
+        @Inject(forwardRef(() => CommentsService))
+        private commentsService: CommentsService
+    ) { }
 
-    create(news: News): News {
-        const id = getRandomInt(0, 99999);
-        const finallyNews = {
-            ...news,
-            id: id
-        }
-        this.news.push(finallyNews);
-        return finallyNews
+    async create(news: CreateNewsDto): Promise<NewsEntity> {
+        const newsEntity = new NewsEntity();
+        newsEntity.title = news.title;
+        newsEntity.description = news.description;
+        newsEntity.cover = news.cover;
+        const _user = await this.userService.findById(parseInt(news.userId));
+        newsEntity.user = _user;
+        return await this.newsRepository.save(newsEntity);
     }
 
-    find(id: News['id']): News | undefined {
-        return this.news.find((news: News) => {
-            return news.id === id
-        })
+    async findById(id: News['id']): Promise<NewsEntity | null> {
+
+        return await this.newsRepository.findOneBy({ id })
     }
 
-    getAll(): News[] {
-        return this.news
+    async getAll(): Promise<NewsEntity[] | undefined> {
+        return await this.newsRepository.find();
     }
 
-    remove(id: News['id']): boolean {
-        const indexRemoveNews = this.news.findIndex((news: News) => news.id === id)
-        let isRemoved = false
-        if (indexRemoveNews !== -1) {
-            const newNewsArray = this.news.splice(indexRemoveNews, 1)
-            if (newNewsArray.length > 0) {
-                isRemoved = true
+    async sortAllByUserId(idUser: number): Promise<NewsEntity[] | undefined> {
+        return await this.newsRepository.find({
+            relations: ["comments", "user"],
+            where: { user: { id: idUser } },
+        });
+    }
+
+    async remove(id: News['id']): Promise<boolean | Error> {
+        try {
+            const removingNews = await this.findById(id);
+            if (removingNews) {
+                const comments = await this.commentsService.findAll(id);
+                if (!(comments instanceof Error)) {
+                    await this.commentsService.removeAllForIdNews(comments);
+                    await this.newsRepository.delete(id);
+                    return true
+                }
             }
+            return false
+        } catch (error) {
+            return new Error(`Произошла ошибка: ${error}`)
         }
-        return isRemoved
     }
 
-    update(id: News['id'], news: NewsDto | undefined): string {
-        let findNews = this.find(id)
-        let indexUpdateNews = this.news.findIndex((news: News) => news.id === id)
-        this.news[indexUpdateNews] = {
-            ...findNews,
-            ...news
+    async update(id: News['id'], news: NewsDto | undefined): Promise<string | Error | null> {
+
+        try {
+            let findNews = await this.findById(id);
+            if (findNews) {
+                const newsEntity = new NewsEntity();
+                newsEntity.title = news.title || findNews.title;
+                newsEntity.description = news.description || findNews.description;
+                newsEntity.cover = news.cover || findNews.cover;
+                await this.newsRepository.update(id, newsEntity)
+                return 'Новость успешна изменена!'
+            }
+            return null
+
+        } catch (error) {
+            return new Error(`Произошла ошибка: ${error}`);
         }
-        return 'Новость успешно изменена'
     }
 
 }

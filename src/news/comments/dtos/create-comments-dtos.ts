@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, ValidateIf, IsArray } from 'class-validator';
+import { IsNotEmpty, IsString, ValidateIf, IsArray, IsNumber } from 'class-validator';
 import { Reply } from '../comments.service';
 
 export class CreateCommentDto {
@@ -9,12 +9,12 @@ export class CreateCommentDto {
 
     @IsNotEmpty()
     @IsString()
-    author: string;
+    userId: string;
 
     @IsArray()
     @ValidateIf((o) => o.reply)
     reply: Reply[];
 
-    @ValidateIf((o) => o.photo)
-    photo: string;
+    // @ValidateIf((o) => o.avatar)
+    // avatar: string;
 }

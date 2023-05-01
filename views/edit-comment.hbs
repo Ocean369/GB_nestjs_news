@@ -1,0 +1,34 @@
+<h1 data-id='{{comment.id}}' data-newsId='{{idNews}}'>Редактирование комментария</h1>
+<h6>Автор: <span style='color: lightpink'>{{comment.user.firstName}}</span></h6>
+<form>
+    <div class="mb-3">
+        <label for="messageInput" class="form-label">Текст комментария</label>
+        <textarea class="form-control" name="message" id="messageInput" rows="3">{{comment.message}}</textarea>
+    </div>
+    <button type="button" class="btn btn-primary" onclick="sendForm()">Редактировать</button>
+</form>
+
+<script src='https://code.jquery.com/jquery-3.6.4.min.js'></script>
+<script>
+    const id = document.querySelector('h1').dataset['id'];
+    const newsId = document.querySelector('h1').dataset['newsid'];
+    console.log(newsId, id);
+
+    function sendForm() {
+        var data = new FormData($('form')[0]);
+
+        $.ajax({
+            url: `/comments/api/${id}`,
+            data: $('form').serialize(),
+            type: 'PUT',
+            success: function (res) {
+                window.location.replace(`http://localhost:3000/news/${newsId}/detail`);
+            },
+            error: function (xhr, status, error) {
+                // Обработка ошибки
+                console.error(error);
+            }
+        })
+    }
+
+</script>

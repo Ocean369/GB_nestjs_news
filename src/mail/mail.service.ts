@@ -4,6 +4,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { CreateNewsDto } from 'src/news/dtos/create-news-dto';
 import { News } from 'src/news/news.service';
 import { EditNewsDto } from 'src/news/dtos/edit-news-dto';
+import { NewsEntity } from 'src/news/news.entity';
 
 @Injectable()
 export class MailService {
@@ -29,7 +30,7 @@ export class MailService {
     }
 
 
-    async sendNewNewsForAdmin(emails: string[], news: News) {
+    async sendNewNewsForAdmin(emails: string[], news: NewsEntity) {
         console.log('Отправляются письма о новой новости администрации ресурса');
 
         for (const email of emails) {
@@ -48,7 +49,7 @@ export class MailService {
         }
     }
 
-    async sendEditNewsForAdmin(emails: string[], editNews: EditNewsDto, oldNews: News) {
+    async sendEditNewsForAdmin(emails: string[], editNews: EditNewsDto, oldNews: NewsEntity) {
         console.log('Отправляются письма о новой новости администрации ресурса');
 
         for (const email of emails) {

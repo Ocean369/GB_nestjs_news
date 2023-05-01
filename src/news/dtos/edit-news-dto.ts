@@ -9,14 +9,6 @@ export class EditNewsDto {
     @ValidateIf((o) => o.description)
     description: string;
 
-    @IsString()
-    @ValidateIf((o) => o.author)
-    author: string;
-
-    @IsNumber()
-    @ValidateIf((o) => o.countView || o.countView === '')
-    countView: number;
-
     @ValidateIf((o) => o.cover)
     cover: string;
 }
