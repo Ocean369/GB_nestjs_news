@@ -36,6 +36,9 @@
                 alert('Комментарий успешно создан!');
                 window.location.replace(`http://localhost:3000/news/${idNews}/detail`);
             },
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('access_token')
+            },
             error: function (xhr, status, error) {
                 // Обработка ошибки
                 console.error(error);

@@ -8,6 +8,7 @@ import { MailModule } from './mail/mail.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { CommentsModule } from './news/comments/comments.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { CommentsModule } from './news/comments/comments.module';
     NewsModule,
     MailModule,
     UsersModule,
-    CommentsModule],
+    CommentsModule,
+    AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
