@@ -1,7 +1,7 @@
 import {
     Controller, Get, Param, Post, Body, Delete, Res,
     UseInterceptors, UploadedFile, Render, HttpException,
-    HttpStatus, ParseIntPipe
+    HttpStatus, ParseIntPipe, UseGuards
 } from '@nestjs/common';
 import { NewsService, News, NewsDto } from './news.service';
 import { Response } from 'express'
@@ -14,6 +14,10 @@ import { HelperFileLoader } from '../utils/HelperFileLoader';
 import { MailService } from 'src/mail/mail.service';
 import { NewsEntity } from './news.entity';
 import { UsersService } from 'src/users/users.service';
+import { LocalAuthGuard } from 'src/auth/local-auth.guard';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Roles } from 'src/auth/role/roles.decorator';
+import { Role } from 'src/auth/role/role.enum';
 
 const helperFileLoader = new HelperFileLoader();
 const PATH_NEWS = '/news_static';
@@ -73,6 +77,8 @@ export class NewsController {
     }
 
 
+
+
     @Get('/:idNews/detail')
     @Render('news-id')
     async getNewsWithCommentsView(@Param('idNews', ParseIntPipe) idNews: number) {
@@ -115,7 +121,8 @@ export class NewsController {
 
     }
 
-
+    @UseGuards(JwtAuthGuard)
+    @Roles(Role.Admin, Role.Moderator)
     @Post('api')
     @UseInterceptors(FileInterceptor('cover',
         {

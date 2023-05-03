@@ -1,11 +1,18 @@
 <h1 data-id='{{news.id}}'>Редактирование новости</h1>
 <form>
-    <div class="mb-3">
-        <label for="titleInput" class="form-label">Заголовок</label>
+    {{#if news.cover}}
+    <img src='http://localhost:3000{{news.cover}}' class="card-img-top"
+        style="height: 200px; object-fit: cover; background: lightgray" alt=''>
+    {{else}}
+    <img src='https://www.fda.gov/files/CDER-whatsnew.png' class="card-img-top"
+        style="height: 200px; object-fit: cover; background: lightgray" alt=''>
+    {{/if}}
+    <div class="mb-3" style='margin-top: 30px;'>
+        <label for="titleInput" class="form-label"><b>Заголовок</b></label>
         <input class="form-control" name='title' id='titleInput' value="{{news.title}}">
     </div>
     <div class="mb-3">
-        <label for="descriptionInput" class="form-label">Описание</label>
+        <label for="descriptionInput" class="form-label"><b>Описание</b></label>
         <textarea class="form-control" name="description" id="descriptionInput" rows="3">{{news.description}}</textarea>
     </div>
     <div class="form-group">
@@ -17,21 +24,27 @@
 
 <script src='https://code.jquery.com/jquery-3.6.4.min.js'></script>
 <script>
-    const id = document.querySelector('h1').dataset['id']
+    const idNews = document.querySelector('h1').dataset['id'];
 
     function sendForm() {
         var data = new FormData($('form')[0]);
 
         $.ajax({
-            url: `/news/api/${id}`,
+            url: `/news/api/${idNews}`,
             data: data,
             cache: false,
             contentType: false,
             processData: false,
             method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('access_token')
+            },
             success: function () {
                 alert('Новость успешнa отредактирована!');
-                window.location.replace(`http://localhost:3000/news/${id}/detail`);
+                window.location.replace(`http://localhost:3000/news/${idNews}/detail`);
+            },
+            error: function (xhr, status, error) {
+                console.error(status, error, xhr);
             }
         })
     }

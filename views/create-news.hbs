@@ -32,6 +32,9 @@
             contentType: false,
             processData: false,
             method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('access_token')
+            },
             success: function () {
                 alert('Новость успешно создана!');
                 window.location.replace("http://localhost:3000/news/all");

@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString, ValidateIf, IsEnum } from 'class-validator';
 import { Role } from 'src/auth/role/role.enum';
 
-export class CreateUserDto {
+export class UpdateUserDto {
     @IsNotEmpty()
     @IsString()
     firstName: string;
@@ -10,13 +10,9 @@ export class CreateUserDto {
     @IsString()
     email: string;
 
-    @IsNotEmpty()
+
     @IsString()
     password: string;
-
-    @IsNotEmpty()
-    @IsEnum(Role)
-    roles: Role;
 
     @ValidateIf((o) => o.avatar)
     avatar: string;

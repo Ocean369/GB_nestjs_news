@@ -1,5 +1,5 @@
 {{#if news}}
-<div class="row">
+<div class="row" style='margin: 50px'>
     {{#each news}}
     <div class="col-lg-6">
         <div class="card" onclick="window.location.href = '/news/{{this.id}}/detail/'" style="cursor: pointer;">
@@ -12,8 +12,8 @@
             {{/if}}
             <div class="card-body">
                 <h5 class="card-title">{{this.title}}</h5>
-                {{!-- <h6 class="card-subtitle mb-2 text-muted">Автор:
-                    {{this.author}}</h6> --}}
+                <h6 class="card-subtitle mb-2 text-muted" style='color:darkorchid'>Автор:
+                    {{this.user.firstName}}</h6>
                 <p class="card-text" style='height: 50px; overflow:hidden;'>{{this.description}}</p>
             </div>
         </div>

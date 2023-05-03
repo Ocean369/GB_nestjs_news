@@ -1,0 +1,28 @@
+<header style='background: black; height: 100px; padding: 30px 30px'>
+    <nav style='gap:10px; color:cornsilk; display: flex; justify-content:space-between; '>
+        <div id="allNews" onclick="window.location.href = '/news/all'" style='cursor: pointer;'>ALL NEWS</div>
+        <div style='gap:10px; color:cornsilk; display: flex; justify-content:end;'>
+            <div id="Profile" onclick="openProfile()" style='cursor: pointer;'>PROFILE</div>
+            <div id="authorization" onclick="window.location.href = '/signin'" style='cursor: pointer;'>SIGN IN</div>
+        </div>
+    </nav>
+</header>
+
+<script>
+    const access_token = sessionStorage.getItem('access_token');
+    const id = sessionStorage.getItem('idUser');
+    console.log('at', access_token);
+
+    function openProfile() {
+        window.location.href = `/users/profile?idUser=${id}`
+    }
+
+    if (access_token !== null && access_token !== '') {
+        document.getElementById('Profile').style.display = 'block';
+        document.getElementById('authorization').style.display = 'none';
+
+    } else {
+        document.getElementById('Profile').style.display = 'none';
+        document.getElementById('authorization').style.display = 'block';
+    }
+</script>

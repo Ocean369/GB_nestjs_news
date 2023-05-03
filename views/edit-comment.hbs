@@ -10,17 +10,20 @@
 
 <script src='https://code.jquery.com/jquery-3.6.4.min.js'></script>
 <script>
-    const id = document.querySelector('h1').dataset['id'];
+    const idComm = document.querySelector('h1').dataset['id'];
     const newsId = document.querySelector('h1').dataset['newsid'];
-    console.log(newsId, id);
+    console.log(newsId, idComm);
 
     function sendForm() {
         var data = new FormData($('form')[0]);
 
         $.ajax({
-            url: `/comments/api/${id}`,
+            url: `/comments/api/${idComm}`,
             data: $('form').serialize(),
             type: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('access_token')
+            },
             success: function (res) {
                 window.location.replace(`http://localhost:3000/news/${newsId}/detail`);
             },
