@@ -23,14 +23,19 @@
 
     function sendForm() {
         var data = new FormData($('form')[0]);
+        const comment = document.getElementById('messageInput') as HTMLTextAreaElement;
 
         $.ajax({
             url: `${idComm
                 ? `/comments/api/${idNews}/${idComm}`
                 : `/comments/api/${idNews}`
                 } `,
-            data: $('form').serialize(),
+            data: { comment: comment.value },
+            //$('form').serialize(),
             type: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('access_token')
+            },
             success: function (res) {
                 console.log("responce", res)
                 alert('Комментарий успешно создан!');

@@ -6,11 +6,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from 'src/users/users.module';
 import { NewsModule } from '../news.module';
 import { NewsService } from '../news.service';
+import { SocketCommentsGateway } from './socket-comments.gateway';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { WsJwtGuard } from 'src/auth/ws-jwt.guard';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
 
   controllers: [CommentsController],
-  providers: [CommentsService],
+  providers: [CommentsService, SocketCommentsGateway, JwtAuthGuard, WsJwtGuard],
   exports: [
     CommentsService,
     TypeOrmModule.forFeature([CommentsEntity])
@@ -18,6 +22,7 @@ import { NewsService } from '../news.service';
   imports: [
     TypeOrmModule.forFeature([CommentsEntity]),
     UsersModule,
+    AuthModule,
     forwardRef(() => NewsModule),
   ],
 

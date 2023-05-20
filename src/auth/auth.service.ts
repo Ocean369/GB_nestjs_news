@@ -2,7 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { compare } from '../utils/crypto';
 import { JwtService } from '@nestjs/jwt';
-import { UsersEntity } from 'src/users/users.entity';
+import { UsersEntity } from '../users/users.entity';
 
 @Injectable()
 export class AuthService {
@@ -31,5 +31,9 @@ export class AuthService {
 
     async verify(token: string) {
         return this.jwtService.verify(token);
+    }
+
+    async decode(token: string) {
+        return this.jwtService.decode(token);
     }
 }

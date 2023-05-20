@@ -7,6 +7,7 @@ import { CreateCommentDto } from './dtos/create-comments-dtos';
 import { UsersService } from 'src/users/users.service';
 import { EditCommentDto } from './dtos/edit-comments-dtos';
 import { NewsEntity } from '../news.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 export type Reply = {
     id?: number;
@@ -24,13 +25,15 @@ export class CommentsService {
         private userService: UsersService,
         @Inject(forwardRef(() => NewsService))
         private newsService: NewsService,
+        private readonly eventEmitter: EventEmitter2,
     ) { }
 
-    async create(idNews: number, comment: CreateCommentDto, idComm?: number): Promise<CommentsEntity | Error> {
+    async create(idNews: number, message: string, userId: number): Promise<CommentsEntity | Error> {
+        //  comment: CreateCommentDto, idComm?: number): Promise<CommentsEntity | Error> {
         try {
             const commentsEntity = new CommentsEntity;
-            commentsEntity.message = comment.message;
-            const _user = await this.userService.findById(parseInt(comment.userId));
+            commentsEntity.message = message;
+            const _user = await this.userService.findById(userId);
             commentsEntity.user = _user;
             const _news = await this.newsService.findById(idNews);
             commentsEntity.news = _news;
@@ -38,37 +41,14 @@ export class CommentsService {
         } catch (error) {
             return new Error(`Произошла ошибка: ${error}`)
         }
-
-        // }
-        // if (this.comments[idNews]) {
-        //     const indexAnsweredComm = this.comments[idNews].findIndex((comment: Comment) => comment.id === idComm)
-        //     if (indexAnsweredComm !== -1) {
-        //         let reply = this.comments[idNews][indexAnsweredComm].reply;
-        //         if (!reply) {
-        //             reply = []
-        //         }
-        //         const id = getRandomInt()
-        //         reply.push({ ...comment, id: id });
-
-        //         this.comments[idNews][indexAnsweredComm] = {
-        //             ...this.comments[idNews][indexAnsweredComm],
-        //             reply: reply
-        //         }
-        //         return {
-        //             ...this.comments[idNews][indexAnsweredComm],
-        //             reply: reply
-        //         }
-        //     }
-        // }
-        // }
     }
 
-    async findById(id: number): Promise<CommentsEntity | null | Error> {
+    async findById(id: number): Promise<CommentsEntity | null> {
         try {
             return await this.commentsRepository.findOneBy({ id })
 
         } catch (error) {
-            return new Error(`Произошла ошибка: ${error}`)
+            throw new Error(`Произошла ошибка: ${error}`)
         }
     }
 
@@ -85,8 +65,15 @@ export class CommentsService {
 
     async remove(id: number): Promise<Boolean | Error> {
         try {
-            const removingComment = await this.findById(id);
-            if (removingComment) {
+            const _removingComment = await this.commentsRepository.findOne({
+                where: { id: id },
+                relations: ['news']
+            });
+            if (_removingComment && _removingComment instanceof CommentsEntity) {
+                this.eventEmitter.emit('comment.remove', {
+                    commentId: id,
+                    newsId: _removingComment.news.id
+                })
                 await this.commentsRepository.delete(id);
                 return true
             }
@@ -106,12 +93,17 @@ export class CommentsService {
 
     }
 
-    async update(id: number, comment: EditCommentDto): Promise<boolean | Error> {
+    async update(id: number, message: string): Promise<boolean | Error> {
         try {
-            let findComment = await this.findById(id);
-            if (findComment) {
+            let _comment = await this.findById(id);
+            if (_comment && _comment instanceof CommentsEntity) {
                 const commentsEntity = new CommentsEntity;
-                commentsEntity.message = comment.message || commentsEntity.message;
+                commentsEntity.message = message || commentsEntity.message;
+                this.eventEmitter.emit('comment.edit', {
+                    commentId: id,
+                    newsId: _comment.news.id,
+                    message: commentsEntity.message
+                })
                 await this.commentsRepository.update(id, commentsEntity)
                 return true
             }

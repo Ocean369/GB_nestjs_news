@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from './users.entity';
 import { Repository } from 'typeorm';
@@ -6,6 +6,9 @@ import { CreateUserDto } from './dtos/create-user-dtos';
 import { Role } from '../auth/role/role.enum';
 import { hash } from '../utils/crypto';
 import { UpdateUserDto } from './dtos/update-user-dtos';
+import { response } from 'express';
+import { Modules } from 'src/auth/role/utils/check-permission';
+import { checkPermission } from '../auth/role/utils/check-permission'
 
 @Injectable()
 export class UsersService {
@@ -46,19 +49,31 @@ export class UsersService {
 
     async edit(id: number, user: UpdateUserDto): Promise<boolean | Error> {
         try {
-            let findUser = await this.findById(id);
-            if (findUser) {
+
+            let _user = await this.findById(id);
+            if (_user) {
                 const userEntity = new UsersEntity();
-                userEntity.firstName = user.firstName || findUser.firstName;
-                userEntity.email = user.email || findUser.email;
-                userEntity.password = await hash(user.password) || findUser.password;
-                userEntity.roles = findUser.roles;
-                userEntity.avatar = user.avatar || findUser.avatar;
+                userEntity.firstName = user.firstName || _user.firstName;
+                userEntity.email = user.email || _user.email;
+                if (user.password !== '') {
+                    userEntity.password = await hash(user.password) || _user.password;
+                }
+                else userEntity.password = _user.password;
+
+                if (checkPermission(Modules.changeRole, _user.roles)) {
+                    userEntity.roles = _user.roles;
+                }
+                userEntity.avatar = user.avatar || _user.avatar;
                 await this.usersRepository.update(id, userEntity)
                 return true
+            } else {
+                throw new HttpException(
+                    {
+                        status: HttpStatus.FORBIDDEN,
+                        error: ' Такого пользователя не существует',
+                    }, HttpStatus.FORBIDDEN
+                )
             }
-            return null
-
         } catch (error) {
             return new Error(`Произошла ошибка: ${error}`);
         }

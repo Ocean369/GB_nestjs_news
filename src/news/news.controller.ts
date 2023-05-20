@@ -85,7 +85,7 @@ export class NewsController {
 
         try {
             const news = await this.newsService.findById(idNews)
-            const comments = await this.commentsService.findAll(idNews);
+            // const comments = await this.commentsService.findAll(idNews);
 
             if (news === null) {
                 throw new HttpException({
@@ -95,7 +95,7 @@ export class NewsController {
                     HttpStatus.NOT_FOUND
                 )
             }
-            return { news, comments }
+            return { news }
         } catch (error) {
             return new Error(`err: ${error}`);
         }
