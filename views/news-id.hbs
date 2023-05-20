@@ -17,10 +17,16 @@
         <h6 class="card-subtitle mb-2 text-muted">Автор: <span style='color: lightpink;'>{{news.user.firstName}}</span>
         </h6>
     </div>
-    <div class="d-flex justify-content-end" style="margin-right: 10px">
-        <button type="button" class="btn btn-info btn-sm p-1" onclick="addComment()">Прокомментировать</button>
+
+    <!-- Блок комментариев -->
+    <h2 class="fw-bold lh-1 mb-3" style='margin: 30px;'>Комментарии</h2>
+    <!-- Блок, куда ReactJS будет вставлять вёрстку комментариев -->
+    <div id="app">
     </div>
-    <div style="margin: 30px;">
+    <!-- Подключим ReactJS-скрипт комментариев -->
+
+
+    {{!-- <div style="margin: 30px;">
         <div class="card-header" style='border: 1px solid rgba(0,0,0,.125)'>
             Комментарии
         </div>
@@ -49,7 +55,7 @@
                     <button type="button" class="btn btn-info btn-sm p-1" data-idComm='{{this.id}}' id='reply'
                         onclick="handlerAnswer()">Ответить</button>
                 </div> --}}
-                {{#if this.reply}}
+                {{!-- {{#if this.reply}}
                 <div class="card" style="margin-left: 50px; margin-top: 10px; ">
                     <div class="card-header p-1 ">
                         Ответы
@@ -75,30 +81,15 @@
         <div style="padding-left: 20px; border: none;">Комментарии отсутствуют</div>
         {{/if}}
     </div>
-</div>
+</div> --}}
 {{else}}
 <img src="https://www.un.org/sites/un2.un.org/files/2019/07/404_languages-ru.jpg" alt="">
 {{/if}}
 
+<script src="/js/comments.js" type="text/babel"></script>
 
-<script src='https://code.jquery.com/jquery-3.6.4.min.js'></script>
 <script>
     const idNews = document.querySelector('#newsDetail').dataset['id'];
-    console.log(idNews)
-
-
-    document.addEventListener('click', (e) => {
-        let target = e.target;
-        let idComm = target.dataset['id'];
-        if (target instanceof HTMLImageElement && idComm) {
-            window.location.href = `/comments/edit/comment/${idNews}/${idComm}`
-        }
-    })
-
-
-    function addComment() {
-        window.location.replace(`http://localhost:3000/comments/create/comment/${idNews}`)
-    }
 
     if (document.querySelector('#reply')) {
         const idComm = document.querySelector('#reply').dataset['idcomm']
@@ -122,6 +113,5 @@
                 }
             })
         }
-
     }
 </script>

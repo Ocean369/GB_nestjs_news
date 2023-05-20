@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, Redirect, Render, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, Redirect, Render, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user-dtos';
 import { UsersService } from './users.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -43,10 +43,12 @@ export class UsersController {
         }
     }
 
+
     @Get('profile')
     @Render('profile')
     async profileView(
-        @Query('idUser') idUser: string) {
+        @Query('idUser') idUser: string,
+        @Req() req) {
 
         const idUserInt = parseInt(idUser);
 
@@ -60,8 +62,7 @@ export class UsersController {
 
 
     @UseGuards(JwtAuthGuard)
-    @Roles(Role.User)
-    @Put('api/edit/:idUser')
+    @Put('api/edit/')
     @UseInterceptors(FileInterceptor('avatar',
         {
             storage: diskStorage({
@@ -72,14 +73,16 @@ export class UsersController {
         }),
     )
     async update(
-        @Param('idUser', ParseIntPipe) idUser: number,
         @Body() user: UpdateUserDto,
-        @UploadedFile() avatar: Express.Multer.File,): Promise<boolean | Error> {
+        @Req() req,
+        @UploadedFile() avatar: Express.Multer.File): Promise<boolean | Error> {
         try {
+            const jwtUserId = req.user.userId;
+
             if (avatar?.filename) {
                 user.avatar = PATH_NEWS + '/' + avatar.filename;
             }
-            return await this.usersService.edit(idUser, user);
+            return await this.usersService.edit(jwtUserId, user);
         } catch (error) {
             return new Error(`err: ${error}`);
         }

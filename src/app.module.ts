@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { CommentsModule } from './news/comments/comments.module';
 import { AuthModule } from './auth/auth.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { AuthModule } from './auth/auth.module';
     MailModule,
     UsersModule,
     CommentsModule,
-    AuthModule],
+    AuthModule,
+    EventEmitterModule.forRoot()],
   controllers: [AppController],
   providers: [AppService],
 })

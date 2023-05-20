@@ -7,10 +7,6 @@ export class CreateCommentDto {
     @IsString()
     message: string;
 
-    @IsNotEmpty()
-    @IsString()
-    userId: string;
-
     @IsArray()
     @ValidateIf((o) => o.reply)
     reply: Reply[];
