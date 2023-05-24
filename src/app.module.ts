@@ -19,7 +19,7 @@ import { ConfigModule } from '@nestjs/config';
       host: 'localhost',
       port: 5432,
       username: 'postgres',
-      password: 'xxx123123',
+      password: '',
       database: 'news-blog',
       entities: ['dist/**/*.entity{.ts,.js}'],
       synchronize: true,
