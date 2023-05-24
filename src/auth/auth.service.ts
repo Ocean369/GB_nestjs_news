@@ -2,7 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { compare } from '../utils/crypto';
 import { JwtService } from '@nestjs/jwt';
-import { UsersEntity } from '../users/users.entity';
+
 
 @Injectable()
 export class AuthService {
@@ -22,10 +22,12 @@ export class AuthService {
     }
 
     async login(user: any) {
-        const payload = { email: user.username, id: user.id };
+
+        const payload = { email: user.firstName, id: user.id };
+
         return {
             access_token: this.jwtService.sign(payload),
-            id: user.id
+            idUser: user.id
         };
     }
 

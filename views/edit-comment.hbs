@@ -14,13 +14,14 @@
 
     function sendForm() {
         var data = new FormData($('form')[0]);
+        const access_token = getCookie('jwt');
 
         $.ajax({
             url: `/comments/api/${idComm}`,
             data: $('form').serialize(),
             type: 'PUT',
             headers: {
-                'Authorization': 'Bearer ' + sessionStorage.getItem('access_token')
+                'Authorization': 'Bearer ' + access_token
             },
             success: function (res) {
                 window.location.replace(`http://localhost:3000/news/${newsId}/detail`);

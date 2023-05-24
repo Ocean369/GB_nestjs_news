@@ -3,10 +3,7 @@ import { NewsService } from '../news.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CommentsEntity } from './comments.entity';
-import { CreateCommentDto } from './dtos/create-comments-dtos';
-import { UsersService } from 'src/users/users.service';
-import { EditCommentDto } from './dtos/edit-comments-dtos';
-import { NewsEntity } from '../news.entity';
+import { UsersService } from '../../users/users.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 export type Reply = {
@@ -29,7 +26,7 @@ export class CommentsService {
     ) { }
 
     async create(idNews: number, message: string, userId: number): Promise<CommentsEntity | Error> {
-        //  comment: CreateCommentDto, idComm?: number): Promise<CommentsEntity | Error> {
+
         try {
             const commentsEntity = new CommentsEntity;
             commentsEntity.message = message;
@@ -70,10 +67,10 @@ export class CommentsService {
                 relations: ['news']
             });
             if (_removingComment && _removingComment instanceof CommentsEntity) {
-                this.eventEmitter.emit('comment.remove', {
-                    commentId: id,
-                    newsId: _removingComment.news.id
-                })
+                // this.eventEmitter.emit('comment.remove', {
+                //     commentId: id,
+                //     newsId: _removingComment.news.id
+                // })
                 await this.commentsRepository.delete(id);
                 return true
             }

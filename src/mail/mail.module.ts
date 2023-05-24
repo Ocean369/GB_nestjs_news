@@ -11,11 +11,6 @@ import { MailController } from './mail.controller';
   controllers: [MailController],
   imports: [
     MailerModule.forRoot({
-      // transport: 'smtps://akibalka369@gmail.com:SJxC0HpvuM@smtp.gmail.com',
-      // ipgjuljgvcrrottw
-      // B5iesNUQeP8uxmH
-      // transport: 'smtps://akibalka369@yandex.ru:ipgjuljgvcrrottw@smtp.yandex.ru',
-      // pass  TStYFr21rat(
       transport: 'smtps://akibalka369@mail.ru:zLwTK4b9TSgMmtqTbVaE@smtp.mail.ru',
 
       defaults: {

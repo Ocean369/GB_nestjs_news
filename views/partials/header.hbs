@@ -9,15 +9,14 @@
 </header>
 
 <script>
-    const access_token = sessionStorage.getItem('access_token');
-    const id = sessionStorage.getItem('idUser');
-    console.log('at', access_token);
+
+    const idUser = getCookie('idUser');
 
     function openProfile() {
-        window.location.href = `/users/profile?idUser=${id}`
+        window.location.href = `/users/profile?idUser=${idUser}`;
     }
 
-    if (access_token !== null && access_token !== '') {
+    if (idUser) {
         document.getElementById('Profile').style.display = 'block';
         document.getElementById('authorization').style.display = 'none';
 

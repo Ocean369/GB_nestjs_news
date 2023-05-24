@@ -25,93 +25,29 @@
     </div>
     <!-- Подключим ReactJS-скрипт комментариев -->
 
+    {{else}}
+    <img src="https://www.un.org/sites/un2.un.org/files/2019/07/404_languages-ru.jpg" alt="">
+    {{/if}}
 
-    {{!-- <div style="margin: 30px;">
-        <div class="card-header" style='border: 1px solid rgba(0,0,0,.125)'>
-            Комментарии
-        </div>
-        {{#if comments}}
-        <div style='display:flex; flex-direction: column; gap: 10px; margin: 10px 5px;'>
-            {{#each comments}}
-            <div class="card-body border border-info" style='border-radius: 10px;'>
-                <div class='d-flex justify-content-start' style="gap: 30px;">
-                    <div>
-                        {{#if this.user.avatar}}
-                        <img class="mr-3 rounded" src="{{this.user.avatar}}" alt=""
-                            style='width: 75px; height:75px; background: grey;'>
-                        {{else}}
-                        <img class="mr-3 rounded" src="/news_static/no-profile-picture-icon.png" alt=""
-                            style='width: 75px; height:75px; background-image: src()'>
-                        {{/if}}
-                        <img src="/news_static/pen_1.png" style='width: 20px; vertical-align: top; cursor:pointer;'
-                            data-id='{{this.id}}' alt="" data-id='{{this.id}}'>
-                    </div>
-                    <div>
-                        <h6 class="text-muted" style="font-size: 16px;">Автор: {{this.user.firstName}}</h6>
-                        <p class='mb-0' style="font-size: 22px;">{{this.message}}</p>
-                    </div>
-                </div>
-                {{!-- <div class="d-flex justify-content-end">
-                    <button type="button" class="btn btn-info btn-sm p-1" data-idComm='{{this.id}}' id='reply'
-                        onclick="handlerAnswer()">Ответить</button>
-                </div> --}}
-                {{!-- {{#if this.reply}}
-                <div class="card" style="margin-left: 50px; margin-top: 10px; ">
-                    <div class="card-header p-1 ">
-                        Ответы
-                    </div>
-                    {{#each this.reply}}
-                    <div class='d-flex justify-content-start' style="gap:10px; padding: 10px;">
-                        <div>
-                            <img class="mr-3 rounded" src="{{this.user.avatar}}" alt=""
-                                style='width: 65px; height:65px; background: litegrey;'>
-                        </div>
-                        <div class='d-flex flex-sm-column' style="gap: 5px;">
-                            <p class="m-0" style="font-size: 16px; color: lightgray;">Автор: {{this.user.firstName}}</p>
-                            <p style="font-size: 16px; color: gray;">{{this.message}}</p>
-                        </div>
-                    </div>
-                    {{/each}}
-                </div>
-                {{/if}}
-            </div>
-            {{/each}}
-        </div>
-        {{else}}
-        <div style="padding-left: 20px; border: none;">Комментарии отсутствуют</div>
-        {{/if}}
-    </div>
-</div> --}}
-{{else}}
-<img src="https://www.un.org/sites/un2.un.org/files/2019/07/404_languages-ru.jpg" alt="">
-{{/if}}
+    <script src="/js/comments.js" type="text/babel"></script>
 
-<script src="/js/comments.js" type="text/babel"></script>
+    <script>
+        const idNews = document.querySelector('#newsDetail').dataset['id'];
 
-<script>
-    const idNews = document.querySelector('#newsDetail').dataset['id'];
-
-    if (document.querySelector('#reply')) {
-        const idComm = document.querySelector('#reply').dataset['idcomm']
-        function handlerAnswer() {
-            window.location.replace(`http://localhost:3000/comments/create/comment/${idNews}/${idComm}`)
+        function newsEdit() {
+            window.location.replace(`http://localhost:3000/news/edit/news/${idNews}`)
         }
-    }
 
-    function newsEdit() {
-        window.location.replace(`http://localhost:3000/news/edit/news/${idNews}`)
-    }
-
-    function newsDelete() {
-        if (confirm('Вы уверены, что хотите удалить новость?')) {
-            $.ajax({
-                url: `/news/api/${idNews}`,
-                type: 'DELETE',
-                success: function () {
-                    alert('Новость успешно удалена!');
-                    window.location.replace(`http://localhost:3000/news/all`);
-                }
-            })
+        function newsDelete() {
+            if (confirm('Вы уверены, что хотите удалить новость?')) {
+                $.ajax({
+                    url: `/news/api/${idNews}`,
+                    type: 'DELETE',
+                    success: function () {
+                        alert('Новость успешно удалена!');
+                        window.location.replace(`http://localhost:3000/news/all`);
+                    }
+                })
+            }
         }
-    }
-</script>
+    </script>

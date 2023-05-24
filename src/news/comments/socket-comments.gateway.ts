@@ -11,9 +11,10 @@ import { Logger, UseGuards } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { CommentsService } from './comments.service';
 import { OnEvent } from '@nestjs/event-emitter'
-import { WsJwtGuard } from 'src/auth/ws-jwt.guard';
+import { WsJwtGuard } from '../../auth/ws-jwt.guard';
 
 export type Comment = { message: string; idNews: number };
+export type DelComment = { idNews: number; idComm: string };
 
 @WebSocketGateway()
 export class SocketCommentsGateway
@@ -29,6 +30,7 @@ export class SocketCommentsGateway
     async handleMessage(client: Socket, comment: Comment) {
         const { idNews, message } = comment;
         const userId: number = client.data.user.id;
+        console.log('add', idNews, message, userId);
         const _comment = await this.commentsService.create(idNews, message, userId);
         this.server.to(idNews.toString()).emit('newComment', _comment);
     }
@@ -43,10 +45,15 @@ export class SocketCommentsGateway
         this.server.to(newsId.toString()).emit('editComment', {});
     }
 
-    @OnEvent('comment.remove')
-    handleRemoveCommentEvent(payload) {
-        const { commentId, newsId } = payload;
-        this.server.to(newsId.toString()).emit('removeComment', { id: commentId });
+
+    @UseGuards(WsJwtGuard)
+    // подписались на сообщения клиентов с типом 'addComment'
+    @SubscribeMessage('deleteComment')
+    async handleDeleteMessage(client: Socket, delComment: DelComment) {
+        console.log('handleDelete', delComment)
+        const { idNews, idComm } = delComment;
+        const _comment = await this.commentsService.remove(Number(idComm));
+        this.server.to(idNews.toString()).emit('removeComment', { id: idComm });
     }
 
     @OnEvent('comment.edit')
@@ -54,8 +61,6 @@ export class SocketCommentsGateway
         const { commentId, newsId, message } = payload;
         this.server.to(newsId.toString()).emit('editComment', { id: commentId, message: message });
     }
-
-
 
     // событие срабатывает после инициализации сервера
     afterInit(server: Server) {

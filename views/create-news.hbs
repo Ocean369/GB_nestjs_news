@@ -8,10 +8,6 @@
         <label for="descriptionInput" class="form-label">Описание</label>
         <textarea class="form-control" name="description" id="descriptionInput" rows="3"></textarea>
     </div>
-    <div class="mb-3">
-        <label for="authorInput" class="form-label">Автор</label>
-        <input class="form-control" name='userId' id='authorInput'>
-    </div>
     <div class="form-group">
         <label for="cover">Обложка новости</label>
         <input type="file" class="form-control-file" name="cover" id="cover">
@@ -25,6 +21,9 @@
     function sendForm() {
         var data = new FormData($('form')[0]);
 
+        console.log(getCookie('idUser'));
+        data.append('userId', getCookie('idUser'))
+
         $.ajax({
             url: '/news/api',
             data: data,
@@ -32,9 +31,6 @@
             contentType: false,
             processData: false,
             method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + sessionStorage.getItem('access_token')
-            },
             success: function () {
                 alert('Новость успешно создана!');
                 window.location.replace("http://localhost:3000/news/all");

@@ -23,6 +23,7 @@
 
     function sendForm() {
         var data = new FormData($('form')[0]);
+        const access_token = getCookie('jwt');
         const comment = document.getElementById('messageInput') as HTMLTextAreaElement;
 
         $.ajax({
@@ -34,15 +35,12 @@
             //$('form').serialize(),
             type: 'POST',
             headers: {
-                'Authorization': 'Bearer ' + sessionStorage.getItem('access_token')
+                'Authorization': 'Bearer ' + access_token
             },
             success: function (res) {
                 console.log("responce", res)
                 alert('Комментарий успешно создан!');
                 window.location.replace(`http://localhost:3000/news/${idNews}/detail`);
-            },
-            headers: {
-                'Authorization': 'Bearer ' + sessionStorage.getItem('access_token')
             },
             error: function (xhr, status, error) {
                 // Обработка ошибки

@@ -1,23 +1,22 @@
-import { Body, Controller, Param, Post, Get, Delete, Put, Res, UseInterceptors, UploadedFile, Render, ParseIntPipe, UseGuards, Req, Query, HttpException, HttpStatus } from '@nestjs/common';
+import { Body, Controller, Param, Post, Get, Delete, Put, Res, Render, ParseIntPipe, UseGuards, Req, Query, HttpException, HttpStatus, ForbiddenException, } from '@nestjs/common';
 import { CommentsService } from './comments.service';
-// import { Comment, CommentDto } from './comments.service'
-import { Response } from 'express'
+import { Request, Response } from 'express'
 import { EditCommentDto } from './dtos/edit-comments-dtos';
 import { CreateCommentDto } from './dtos/create-comments-dtos';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer'
 import { HelperFileLoader } from '../../utils/HelperFileLoader';
 import { NewsService } from '../news.service';
 import { CommentsEntity } from './comments.entity';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { Roles } from 'src/auth/role/roles.decorator';
-import { Role } from 'src/auth/role/role.enum';
-
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { Roles } from '../../auth/role/roles.decorator';
+import { Role } from '../../auth/role/role.enum';
+import { ApiBody, ApiTags, ApiBearerAuth, ApiResponse, ApiCreatedResponse, ApiForbiddenResponse, ApiFoundResponse, ApiNotFoundResponse, ApiOperation } from '@nestjs/swagger';
 
 const helperFileLoader = new HelperFileLoader();
 const PATH_NEWS = '/news_static';
 helperFileLoader.path = PATH_NEWS;
 
+@ApiTags('comments')
+@ApiBearerAuth()
 @Controller('comments')
 export class CommentsController {
     constructor(private readonly commentsService: CommentsService,
@@ -27,6 +26,7 @@ export class CommentsController {
 
     @Get('create/comment/:idNews/:idComm?')
     @Render('create-comments')
+    @ApiOperation({ summary: 'Страница создания комментария' })
     async createComment(
         @Param('idNews') idNews: string,
         @Param('idComm') idComm: string) {
@@ -36,53 +36,65 @@ export class CommentsController {
 
     @Get('edit/comment/:idNews/:idComm')
     @Render('edit-comment')
+    @ApiOperation({ summary: 'Страница редактирования комментария' })
     async editComment(
         @Param('idNews', ParseIntPipe) idNews: number,
         @Param('idComm', ParseIntPipe) idComm: number,
     ) {
         const comment = await this.commentsService.findById(idComm)
         return { idNews: idNews, comment }
-
     }
 
 
-
-    @Post('/api/:idNews/:idComm?')
+    @Post('/api/:idNews')
+    @ApiOperation({ summary: 'Создание комментария' })
     @UseGuards(JwtAuthGuard)
+    @ApiBody({ type: CreateCommentDto, description: 'Create comment for news', })
+    @ApiCreatedResponse({ description: 'Comment has been successfully created', type: CommentsEntity })
+    @ApiForbiddenResponse({ description: 'Forbidden.' })
     async create(
         @Param('idNews', ParseIntPipe) idNews: number,
         @Body() comment: CreateCommentDto,
         @Req() req,
-        @Param('idComm') idComm?: string): Promise<CommentsEntity | Error> {
+    ): Promise<CommentsEntity | Error> {
         try {
-            if (idComm) {
-                const idCommInt = parseInt(idComm);
-            }
+
             const jwtUserId = await req.user.userId;
+            // console.log('jwtUserId', jwtUserId);
             const newComment = await this.commentsService.create(idNews, comment.message, jwtUserId);
             return newComment
         } catch (error) {
-            return new Error(`err: ${error}`);
+            throw new ForbiddenException('Forbidden.');
         }
     }
 
     @Get('all')
+    @ApiOperation({ summary: 'Получить все комментарии новости' })
+    @ApiFoundResponse({ description: 'All comments', type: [CommentsEntity] })
+    @ApiForbiddenResponse({ description: 'Forbidden.' })
     async get(@Query('idNews', ParseIntPipe) idNews: number) {
         const news = await this.newsService.findById(idNews);
         const comments = await this.commentsService.findAll(idNews)
         return comments
     }
 
-    @Delete('api/:idComm')
+
     @UseGuards(JwtAuthGuard)
+    @Delete('api/:idComm')
+    @ApiOperation({ summary: 'Удаление комментария' })
     @Roles(Role.User, Role.Admin)
+    @ApiResponse({ status: 200, description: 'Comment has been successfully  deleted' })
+    @ApiForbiddenResponse({ description: 'Forbidden.' })
     async remove(
         @Param('idComm', ParseIntPipe) idComm: number,
-        @Req() req): Promise<string | Error> {
+        @Req() req
+    ): Promise<string | Error> {
         try {
-
-            const jwtUserId = await req.user.userId;
+            console.log('request user', req.user);
+            const jwtUserId = req.user.userId;
+            console.log('type of jwtUserId', typeof jwtUserId);
             const jwtUserRole = await req.user.userRoles;
+            console.log('user role', jwtUserRole);
             const _comment = await this.commentsService.findById(idComm);
 
             if (!_comment) {
@@ -93,9 +105,8 @@ export class CommentsController {
                     HttpStatus.NOT_FOUND
                 )
             }
-
             const commentIdUser = _comment.user.id;
-
+            console.log('commentIdUser and type', commentIdUser, typeof commentIdUser);
             if ((jwtUserRole === 'user' && commentIdUser === jwtUserId) || jwtUserRole === 'admin') {
                 const resultRemoving = await this.commentsService.remove(idComm)
                 return 'Комментарий удален!'
@@ -106,8 +117,14 @@ export class CommentsController {
         }
     }
 
+
     @UseGuards(JwtAuthGuard)
     @Put('api/:idComm')
+    @ApiOperation({ summary: 'Редактирование комментария' })
+    @ApiBody({ type: EditCommentDto })
+    @ApiResponse({ status: 201, description: 'The record has been successfully updated.' })
+    @ApiResponse({ status: 403, description: 'Forbidden.' })
+    @ApiNotFoundResponse({ description: 'Передан неверный идентификатор. Комментарий не найден' })
     async update(
         @Param('idComm', ParseIntPipe) idComm: number,
         @Body() message: EditCommentDto,
@@ -116,6 +133,7 @@ export class CommentsController {
         try {
             const _comment = await this.commentsService.findById(idComm);
             const jwtUserId = await req.user.userId;
+            console.log('jwtUserId', jwtUserId);
             console.log('message', message.message, typeof message.message);
             if (!_comment) {
                 response.status(404).end('Передан неверный идентификатор. Комментарий не найден')

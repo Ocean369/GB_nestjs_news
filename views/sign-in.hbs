@@ -17,7 +17,6 @@
     </div>
 </form>
 
-<script src='https://code.jquery.com/jquery-3.6.4.min.js'></script>
 <script>
     function sendForm() {
         var data = new FormData($('form')[0]);
@@ -27,13 +26,7 @@
             data: $('form').serialize(),
             type: 'POST',
             success: function (res) {
-                console.log(res.status)
-                sessionStorage.setItem('access_token', res.access_token);
-                sessionStorage.setItem('idUser', res.id);
                 window.location.href = '/';
-                // Получаем access_token из localStorage
-                // const accessToken = sessionStorage.getItem('access_token');
-                //sessionStorage.removeItem('username');
             },
             error: function (xhr, status, error) {
                 // Обработка ошибки

@@ -12,8 +12,9 @@ class Comments extends React.Component {
         };
         // Парсим строку, извлекаем id новости
         this.idNews = parseInt(window.location.href.split('/').reverse()[1]);
-        const bearerToken = sessionStorage.getItem('access_token');
-        this.idUser = sessionStorage.getItem('idUser');
+        const bearerToken = getCookie('jwt');
+        this.idUser = getCookie('idUser');
+        console.log('idUser', this.idUser)
 
         this.socket = io('http://localhost:3000', {
             query: {
@@ -44,7 +45,7 @@ class Comments extends React.Component {
         this.socket.on('removeComment', (payload) => {
             const { id } = payload;
             // Оставляем комментарии, которые не равны удалённому id комментария
-            const comments = this.state.comments.filter((c) => c.id !== id);
+            const comments = this.state.comments.filter((c) => c.id !== Number(id));
             this.setState({ comments });
         });
 
@@ -59,7 +60,7 @@ class Comments extends React.Component {
             });
 
             let isEditUpdate = this.state.isEdit;
-
+            //console.log('isEdit', this.state.isEdit)
             for (const keyId in isEditUpdate) {
                 if (id === Number(keyId)) {
                     isEditUpdate[keyId] = true
@@ -68,6 +69,7 @@ class Comments extends React.Component {
 
             this.setState({ comments: editcomments });
             this.setState({ isEdit: isEditUpdate });
+            //console.log('isEdit new', this.state.isEdit)
         });
     }
 
@@ -107,28 +109,23 @@ class Comments extends React.Component {
         const idComm = event.target.dataset['id'];
         document.getElementById('updateMessage').setAttribute('data-id', idComm);
         const parentBlock = event.target.parentElement.parentElement.children[1];
-        console.dir(parentBlock);
         const name = parentBlock.firstChild.textContent;
         this.setState({ messageEdit: parentBlock.firstChild.nextSibling.textContent });
-        console.dir(parentBlock.firstChild.nextSibling.textContent)
     }
 
     deleteCommment = async (event) => {
+        console.log('delete on click');
         const idComm = event.target.dataset['id'];
-        const bearerToken = sessionStorage.getItem('access_token');
-        const response = await fetch(
-            `http://localhost:3000/comments/api/${idComm}`,
-            {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': 'Bearer ' + bearerToken
-                },
-            },
-        );
+        this.socket.emit('deleteComment', {
+            idNews: this.idNews,
+            idComm: idComm
+        });
+        // const bearerToken = getCookie('jwt');     
     }
 
     updateMessage = async (event) => {
         const idComm = event.target.dataset['id'];
+        const accessToken = getCookie('jwt');
 
         try {
             const response = await fetch(
@@ -137,7 +134,6 @@ class Comments extends React.Component {
                     method: 'PUT',
                     body: JSON.stringify({ message: this.state.messageEdit }),
                     headers: {
-                        'Authorization': 'Bearer ' + sessionStorage.getItem('access_token'),
                         'Content-Type': 'application/json;charset=utf-8'
                     },
                 }

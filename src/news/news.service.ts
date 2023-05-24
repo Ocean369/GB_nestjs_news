@@ -4,11 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NewsEntity } from './news.entity';
 import { CreateNewsDto } from './dtos/create-news-dto';
-import { UsersEntity } from 'src/users/users.entity';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 import { CommentsService } from './comments/comments.service';
-import { CreateCommentDto } from './comments/dtos/create-comments-dtos';
-import { CommentsEntity } from './comments/comments.entity';
 
 export interface News {
     id?: number;
