@@ -57,20 +57,24 @@ class Comments extends React.Component {
 
         this.socket.on('editComment', (payload) => {
             const { id, message } = payload;
-
+            console.log('old', this.state.comments);
+            console.log('id and message', id, message);
             const editcomments = this.state.comments.map((c) => {
                 if (c.id === id) {
                     c.message = message
                 }
                 return c
             });
+            console.log('edited', editcomments);
 
+            console.log('old EditUpdate ', this.state.isEdit);
             let isEditUpdate = this.state.isEdit;
             for (const keyId in isEditUpdate) {
                 if (id === Number(keyId)) {
                     isEditUpdate[keyId] = true
                 }
             }
+            console.log('new EditUpdate ', isEditUpdate);
 
             this.setState({ comments: editcomments });
             this.setState({ isEdit: isEditUpdate });
@@ -113,7 +117,7 @@ class Comments extends React.Component {
         const idComm = event.target.dataset['id'];
         document.getElementById('updateMessage').setAttribute('data-id', idComm);
         const parentBlock = event.target.parentElement.parentElement.children[1];
-        const name = parentBlock.firstChild.textContent;
+        // const name = parentBlock.firstChild.textContent;
         this.setState({ messageEdit: parentBlock.firstChild.nextSibling.textContent });
     }
 
