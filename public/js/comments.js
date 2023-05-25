@@ -13,11 +13,11 @@ class Comments extends React.Component {
         };
         // Парсим строку, извлекаем id новости
         this.idNews = parseInt(window.location.href.split('/').reverse()[1]);
-        const bearerToken = getCookie('jwt');
+        this.bearerToken = getCookie('jwt');
 
-        if (bearerToken) {
-            this.setState({ isAuthorized: true });
-        } else { this.setState({ isAuthorized: false }); }
+        // if (bearerToken) {
+        //     this.setState({ isAuthorized: true });
+        // } else { this.setState({ isAuthorized: false }); }
 
         this.idUser = getCookie('idUser');
 
@@ -28,10 +28,7 @@ class Comments extends React.Component {
             },
             transportOptions: {
                 polling: {
-                    extraHeaders: {
-                        // Устанавливаем авторизационный токен для Guard
-                        Authorization: 'Bearer ' + bearerToken,
-                    },
+
                 },
             },
         });
@@ -40,6 +37,10 @@ class Comments extends React.Component {
     componentDidMount() {
         // Вызываем метод получения всех комментариев
         this.getAllComments();
+
+        if (this.idUser) {
+            this.setState({ isAuthorized: true });
+        } else { this.setState({ isAuthorized: false }); }
 
         this.socket.on('newComment', (message) => {
             const comments = this.state.comments;
@@ -198,7 +199,7 @@ class Comments extends React.Component {
                 })
                 }
                 <hr />
-                {this.isAuthorized
+                {this.state.isAuthorized
                     ? <div id='formAddComment'>
                         <h6 className="lh-1 mt-3">Форма добавления комментариев</h6>
                         <div className="form-floating mb-1">
