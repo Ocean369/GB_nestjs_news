@@ -40,10 +40,9 @@
         const idNews = document.querySelector('#newsDetail').dataset['id'];
         const idUserNews = document.querySelector('#newsDetail').dataset['iduser'];
         const idUserAuth = getCookie('idUser');
-        console.log('idUserNews', idUserNews);
-        console.log('idUserAuth', idUserAuth);
+        
         if (idUserNews === idUserAuth) {
-            document.getElementById('editNews').style.display = 'block';
+            document.getElementById('editNews').style.display = 'inline';
             document.getElementById('deleteNews').style.display = 'block';
         } else {
             document.getElementById('editNews').style.display = 'none';
