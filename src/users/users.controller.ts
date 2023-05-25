@@ -1,25 +1,27 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, Redirect, Render, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, ParseIntPipe, Post, Put, Query, Render, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user-dtos';
 import { UsersService } from './users.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer'
 import { HelperFileLoader } from '../utils/HelperFileLoader';
-import { UsersEntity } from './users.entity';
-import { LocalAuthGuard } from 'src/auth/local-auth.guard';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { Role } from 'src/auth/role/role.enum';
-import { Roles } from 'src/auth/role/roles.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UpdateUserDto } from './dtos/update-user-dtos';
+import { ApiBody, ApiTags, ApiConsumes, ApiCreatedResponse, ApiForbiddenResponse, ApiResponse, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { UsersEntity } from './users.entity';
 
 const helperFileLoader = new HelperFileLoader();
 const PATH_NEWS = '/news_static';
 helperFileLoader.path = PATH_NEWS;
 
+@ApiTags('users')
+@ApiBearerAuth()
 @Controller('users')
 export class UsersController {
     constructor(private readonly usersService: UsersService) { }
 
     @Post('api')
+    @ApiOperation({ summary: 'Создание пользователя' })
+    @ApiConsumes('multipart/form-data')
     @UseInterceptors(FileInterceptor('avatar',
         {
             storage: diskStorage({
@@ -29,6 +31,9 @@ export class UsersController {
             fileFilter: helperFileLoader.fileFilter
         }),
     )
+    @ApiBody({ type: CreateUserDto })
+    @ApiCreatedResponse({ description: 'The record has been successfully created.', type: UsersEntity })
+    @ApiForbiddenResponse({ description: 'Forbidden.' })
     async create(
         @Body() user: CreateUserDto,
         @UploadedFile() avatar: Express.Multer.File,): Promise<Object | Error> {
@@ -45,15 +50,16 @@ export class UsersController {
 
 
     @Get('profile')
+    @ApiOperation({ summary: 'Страница профиль пользователя' })
+    @ApiResponse({ status: 200, description: 'User profile page loaded', type: UsersEntity })
+    @ApiResponse({ status: 403, description: 'Forbidden.' })
     @Render('profile')
     async profileView(
-        @Query('idUser') idUser: string,
-        @Req() req) {
-
-        const idUserInt = parseInt(idUser);
-
+        @Query('idUser', ParseIntPipe) idUser: number,
+        @Req() req: Request) {
         try {
-            const user = await this.usersService.findById(idUserInt);
+            console.log('profile view')
+            const user = await this.usersService.findById(idUser);
             return { user }
         } catch (error) {
             return new Error(`err: ${error}`);
@@ -63,6 +69,8 @@ export class UsersController {
 
     @UseGuards(JwtAuthGuard)
     @Put('api/edit/')
+    @ApiOperation({ summary: 'Редактирование данных пользователя' })
+    @ApiConsumes('multipart/form-data')
     @UseInterceptors(FileInterceptor('avatar',
         {
             storage: diskStorage({
@@ -72,12 +80,16 @@ export class UsersController {
             fileFilter: helperFileLoader.fileFilter
         }),
     )
+    @ApiBody({ type: UpdateUserDto })
+    @ApiResponse({ status: 201, description: 'The record has been successfully updated.' })
+    @ApiResponse({ status: 403, description: 'Forbidden.' })
     async update(
         @Body() user: UpdateUserDto,
         @Req() req,
         @UploadedFile() avatar: Express.Multer.File): Promise<boolean | Error> {
         try {
             const jwtUserId = req.user.userId;
+            console.log('userId', jwtUserId)
 
             if (avatar?.filename) {
                 user.avatar = PATH_NEWS + '/' + avatar.filename;

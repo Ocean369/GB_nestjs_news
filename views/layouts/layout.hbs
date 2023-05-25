@@ -20,6 +20,18 @@
     <script type='text/javascript' src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
     <script src='https://code.jquery.com/jquery-3.6.4.min.js'></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+    <script>
+        function getCookie(name) {
+            var nameEQ = name + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+    </script>
 
 </head>
 
@@ -36,5 +48,6 @@
     <!-- Инициализировано место под шаблон footer -->
     {{> footer}}
 </body>
+
 
 </html>

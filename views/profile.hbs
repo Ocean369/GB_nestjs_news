@@ -40,10 +40,7 @@
 <script>window.location.href = '/signin'</script>
 {{/if}}
 
-
-<script src='https://code.jquery.com/jquery-3.6.4.min.js'></script>
 <script>
-
     function viewEditAvatar() {
         document.getElementById('editAvatar').style.display = 'block';
     }
@@ -55,8 +52,7 @@
 
     function sendForm() {
         var data = new FormData($('form')[0]);
-        const id = document.querySelector('h1').dataset['id'];
-
+        const access_token = getCookie('jwt');
         const avatar = data.get('avatar');
 
         data.delete('Confirmpass');
@@ -70,7 +66,7 @@
             processData: false,
             method: 'PUT',
             headers: {
-                'Authorization': 'Bearer ' + sessionStorage.getItem('access_token')
+                'Authorization': 'Bearer ' + access_token
             },
             success: function (res) {
                 alert('Profile updated!');

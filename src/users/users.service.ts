@@ -6,8 +6,7 @@ import { CreateUserDto } from './dtos/create-user-dtos';
 import { Role } from '../auth/role/role.enum';
 import { hash } from '../utils/crypto';
 import { UpdateUserDto } from './dtos/update-user-dtos';
-import { response } from 'express';
-import { Modules } from 'src/auth/role/utils/check-permission';
+import { Modules } from '../auth/role/utils/check-permission';
 import { checkPermission } from '../auth/role/utils/check-permission'
 
 @Injectable()

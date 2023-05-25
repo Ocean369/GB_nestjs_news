@@ -4,7 +4,7 @@
     <div class="col-lg-6">
         <div class="card" onclick="window.location.href = '/news/{{this.id}}/detail'" style="cursor: pointer;">
             {{#if this.cover}}
-            <img src='http://localhost:3000{{this.cover}}' class="card-img-top"
+            <img src='{{this.cover}}' class="card-img-top"
                 style="height: 200px; object-fit: cover; background: lightgray" alt=''>
             {{else}}
             <img src='https://www.fda.gov/files/CDER-whatsnew.png' class="card-img-top"

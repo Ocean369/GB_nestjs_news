@@ -8,24 +8,27 @@ class Comments extends React.Component {
             message: '',
             messageEdit: '',
             isEdit: {},
-            isUpdateComment: 'none'
+            isUpdateComment: 'none',
+            isAuthorized: false
         };
         // Парсим строку, извлекаем id новости
         this.idNews = parseInt(window.location.href.split('/').reverse()[1]);
-        const bearerToken = sessionStorage.getItem('access_token');
-        this.idUser = sessionStorage.getItem('idUser');
+        this.bearerToken = getCookie('jwt');
 
-        this.socket = io('http://localhost:3000', {
+        // if (bearerToken) {
+        //     this.setState({ isAuthorized: true });
+        // } else { this.setState({ isAuthorized: false }); }
+
+        this.idUser = getCookie('idUser');
+
+        this.socket = io('/', {
             query: {
                 // Устанавливаем id новости, он потребуется серверу для назначения комнаты пользователю
                 newsId: this.idNews,
             },
             transportOptions: {
                 polling: {
-                    extraHeaders: {
-                        // Устанавливаем авторизационный токен для Guard
-                        Authorization: 'Bearer ' + bearerToken,
-                    },
+
                 },
             },
         });
@@ -34,6 +37,10 @@ class Comments extends React.Component {
     componentDidMount() {
         // Вызываем метод получения всех комментариев
         this.getAllComments();
+
+        if (this.idUser) {
+            this.setState({ isAuthorized: true });
+        } else { this.setState({ isAuthorized: false }); }
 
         this.socket.on('newComment', (message) => {
             const comments = this.state.comments;
@@ -44,27 +51,30 @@ class Comments extends React.Component {
         this.socket.on('removeComment', (payload) => {
             const { id } = payload;
             // Оставляем комментарии, которые не равны удалённому id комментария
-            const comments = this.state.comments.filter((c) => c.id !== id);
+            const comments = this.state.comments.filter((c) => c.id !== Number(id));
             this.setState({ comments });
         });
 
         this.socket.on('editComment', (payload) => {
             const { id, message } = payload;
-
+            console.log('old', this.state.comments);
+            console.log('id and message', id, message);
             const editcomments = this.state.comments.map((c) => {
                 if (c.id === id) {
                     c.message = message
                 }
                 return c
             });
+            console.log('edited', editcomments);
 
+            console.log('old EditUpdate ', this.state.isEdit);
             let isEditUpdate = this.state.isEdit;
-
             for (const keyId in isEditUpdate) {
                 if (id === Number(keyId)) {
                     isEditUpdate[keyId] = true
                 }
             }
+            console.log('new EditUpdate ', isEditUpdate);
 
             this.setState({ comments: editcomments });
             this.setState({ isEdit: isEditUpdate });
@@ -74,7 +84,7 @@ class Comments extends React.Component {
     // Метод получения всех комментариев
     getAllComments = async () => {
         const response = await fetch(
-            `http://localhost:3000/comments/all?idNews=${this.idNews}`,
+            `/comments/all?idNews=${this.idNews}`,
             {
                 method: 'GET',
             },
@@ -107,37 +117,31 @@ class Comments extends React.Component {
         const idComm = event.target.dataset['id'];
         document.getElementById('updateMessage').setAttribute('data-id', idComm);
         const parentBlock = event.target.parentElement.parentElement.children[1];
-        console.dir(parentBlock);
-        const name = parentBlock.firstChild.textContent;
+        // const name = parentBlock.firstChild.textContent;
         this.setState({ messageEdit: parentBlock.firstChild.nextSibling.textContent });
-        console.dir(parentBlock.firstChild.nextSibling.textContent)
     }
 
     deleteCommment = async (event) => {
+        console.log('delete on click');
         const idComm = event.target.dataset['id'];
-        const bearerToken = sessionStorage.getItem('access_token');
-        const response = await fetch(
-            `http://localhost:3000/comments/api/${idComm}`,
-            {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': 'Bearer ' + bearerToken
-                },
-            },
-        );
+        this.socket.emit('deleteComment', {
+            idNews: this.idNews,
+            idComm: idComm
+        });
+        // const bearerToken = getCookie('jwt');     
     }
 
     updateMessage = async (event) => {
         const idComm = event.target.dataset['id'];
+        const accessToken = getCookie('jwt');
 
         try {
             const response = await fetch(
-                `http://localhost:3000/comments/api/${idComm}`,
+                `/comments/api/${idComm}`,
                 {
                     method: 'PUT',
                     body: JSON.stringify({ message: this.state.messageEdit }),
                     headers: {
-                        'Authorization': 'Bearer ' + sessionStorage.getItem('access_token'),
                         'Content-Type': 'application/json;charset=utf-8'
                     },
                 }
@@ -199,25 +203,27 @@ class Comments extends React.Component {
                 })
                 }
                 <hr />
-                <div>
-                    <h6 className="lh-1 mt-3">Форма добавления комментариев</h6>
-                    <div className="form-floating mb-1">
-                        <textarea
-                            className="form-control"
-                            placeholder="Leave a comment here"
-                            value={this.state.message}
-                            name="message"
-                            onChange={this.onChange}
-                        ></textarea>
-                        <label htmlFor="floatingmessagearea2">Комментарий</label>
+                {this.state.isAuthorized
+                    ? <div id='formAddComment'>
+                        <h6 className="lh-1 mt-3">Форма добавления комментариев</h6>
+                        <div className="form-floating mb-1">
+                            <textarea
+                                className="form-control"
+                                placeholder="Leave a comment here"
+                                value={this.state.message}
+                                name="message"
+                                onChange={this.onChange}
+                            ></textarea>
+                            <label htmlFor="floatingmessagearea2">Комментарий</label>
+                        </div>
+                        <button
+                            onClick={this.sendMessage}
+                            className="btn btn-outline-info btn-sm px-4 me-sm-3 fw-bold"
+                        >
+                            Send
+                        </button>
                     </div>
-                    <button
-                        onClick={this.sendMessage}
-                        className="btn btn-outline-info btn-sm px-4 me-sm-3 fw-bold"
-                    >
-                        Send
-                    </button>
-                </div>
+                    : ''}
 
                 <div className='editForm' style={{
                     position: 'absolute',

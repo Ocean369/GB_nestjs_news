@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { CommentsModule } from './news/comments/comments.module';
 import { AuthModule } from './auth/auth.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -31,8 +32,10 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     UsersModule,
     CommentsModule,
     AuthModule,
-    EventEmitterModule.forRoot()],
+    EventEmitterModule.forRoot(),
+    ConfigModule.forRoot()],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule { }
+
