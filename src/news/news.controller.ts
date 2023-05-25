@@ -97,7 +97,7 @@ export class NewsController {
         }
     }
 
-
+    @UseGuards(JwtAuthGuard)
     @Get('create/news')
     @ApiOperation({ summary: 'Страница создания новости' })
     @Render('create-news')
@@ -105,7 +105,7 @@ export class NewsController {
         return {}
     }
 
-
+    @UseGuards(JwtAuthGuard)
     @Get('edit/news/:idNews')
     @ApiOperation({ summary: 'Страница редактирования новости' })
     @Render('edit-news')
@@ -117,10 +117,9 @@ export class NewsController {
         } catch (error) {
             return new Error(`err: ${error}`);
         }
-
     }
 
-    //@UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard)
     //@Roles(Role.Admin, Role.Moderator)
     @Post('api')
     @ApiOperation({ summary: 'Create news' })
@@ -153,6 +152,7 @@ export class NewsController {
         }
     }
 
+    @UseGuards(JwtAuthGuard)
     @Delete('api/:id')
     @ApiResponse({ status: 200, description: 'News has been successfully  deleted' })
     @ApiForbiddenResponse({ description: 'Forbidden.' })
@@ -167,6 +167,7 @@ export class NewsController {
 
     }
 
+    @UseGuards(JwtAuthGuard)
     @Post('api/:id')
     @ApiOperation({ summary: 'Update news' })
     @UseInterceptors(FileInterceptor('cover',

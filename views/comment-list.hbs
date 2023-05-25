@@ -46,14 +46,13 @@
 </div>
 
 
-<script src='https://code.jquery.com/jquery-3.6.4.min.js'></script>
 <script>
     const idNews = document.querySelector('h1').dataset['idnews'];
 
     if (document.querySelector('#reply')) {
         const idComm = document.querySelector('#reply').dataset['idcomm']
         function handlerAnswer() {
-            window.location.replace(`http://localhost:3000/comments/create/comment/${idNews}/${idComm}`)
+            window.location.href = `/comments/create/comment/${idNews}/${idComm}`;
         }
     }
 </script>

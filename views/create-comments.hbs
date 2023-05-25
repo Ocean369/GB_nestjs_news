@@ -15,7 +15,7 @@
     <button type="button" class="btn btn-primary" onclick="sendForm()">Создать</button>
 </form>
 
-<script src='https://code.jquery.com/jquery-3.6.4.min.js'></script>
+
 <script>
     const idNews = document.querySelector('h1').dataset['idnews'];
     const idComm = document.querySelector('h1').dataset['idcomm'];
@@ -32,7 +32,6 @@
                 : `/comments/api/${idNews}`
                 } `,
             data: { comment: comment.value },
-            //$('form').serialize(),
             type: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + access_token
@@ -40,7 +39,7 @@
             success: function (res) {
                 console.log("responce", res)
                 alert('Комментарий успешно создан!');
-                window.location.replace(`http://localhost:3000/news/${idNews}/detail`);
+                window.location.href = `/news/${idNews}/detail`;
             },
             error: function (xhr, status, error) {
                 // Обработка ошибки

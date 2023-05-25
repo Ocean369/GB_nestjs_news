@@ -8,13 +8,18 @@ class Comments extends React.Component {
             message: '',
             messageEdit: '',
             isEdit: {},
-            isUpdateComment: 'none'
+            isUpdateComment: 'none',
+            isAuthorized: false
         };
         // Парсим строку, извлекаем id новости
         this.idNews = parseInt(window.location.href.split('/').reverse()[1]);
         const bearerToken = getCookie('jwt');
+
+        if (bearerToken) {
+            this.setState({ isAuthorized: true });
+        } else { this.setState({ isAuthorized: false }); }
+
         this.idUser = getCookie('idUser');
-        console.log('idUser', this.idUser)
 
         this.socket = io('http://localhost:3000', {
             query: {
@@ -60,7 +65,6 @@ class Comments extends React.Component {
             });
 
             let isEditUpdate = this.state.isEdit;
-            //console.log('isEdit', this.state.isEdit)
             for (const keyId in isEditUpdate) {
                 if (id === Number(keyId)) {
                     isEditUpdate[keyId] = true
@@ -69,14 +73,13 @@ class Comments extends React.Component {
 
             this.setState({ comments: editcomments });
             this.setState({ isEdit: isEditUpdate });
-            //console.log('isEdit new', this.state.isEdit)
         });
     }
 
     // Метод получения всех комментариев
     getAllComments = async () => {
         const response = await fetch(
-            `http://localhost:3000/comments/all?idNews=${this.idNews}`,
+            `/comments/all?idNews=${this.idNews}`,
             {
                 method: 'GET',
             },
@@ -129,7 +132,7 @@ class Comments extends React.Component {
 
         try {
             const response = await fetch(
-                `http://localhost:3000/comments/api/${idComm}`,
+                `/comments/api/${idComm}`,
                 {
                     method: 'PUT',
                     body: JSON.stringify({ message: this.state.messageEdit }),
@@ -195,25 +198,27 @@ class Comments extends React.Component {
                 })
                 }
                 <hr />
-                <div>
-                    <h6 className="lh-1 mt-3">Форма добавления комментариев</h6>
-                    <div className="form-floating mb-1">
-                        <textarea
-                            className="form-control"
-                            placeholder="Leave a comment here"
-                            value={this.state.message}
-                            name="message"
-                            onChange={this.onChange}
-                        ></textarea>
-                        <label htmlFor="floatingmessagearea2">Комментарий</label>
+                {this.isAuthorized
+                    ? <div id='formAddComment'>
+                        <h6 className="lh-1 mt-3">Форма добавления комментариев</h6>
+                        <div className="form-floating mb-1">
+                            <textarea
+                                className="form-control"
+                                placeholder="Leave a comment here"
+                                value={this.state.message}
+                                name="message"
+                                onChange={this.onChange}
+                            ></textarea>
+                            <label htmlFor="floatingmessagearea2">Комментарий</label>
+                        </div>
+                        <button
+                            onClick={this.sendMessage}
+                            className="btn btn-outline-info btn-sm px-4 me-sm-3 fw-bold"
+                        >
+                            Send
+                        </button>
                     </div>
-                    <button
-                        onClick={this.sendMessage}
-                        className="btn btn-outline-info btn-sm px-4 me-sm-3 fw-bold"
-                    >
-                        Send
-                    </button>
-                </div>
+                    : ''}
 
                 <div className='editForm' style={{
                     position: 'absolute',

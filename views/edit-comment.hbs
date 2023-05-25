@@ -24,7 +24,7 @@
                 'Authorization': 'Bearer ' + access_token
             },
             success: function (res) {
-                window.location.replace(`http://localhost:3000/news/${newsId}/detail`);
+                window.location.href = `/news/${newsId}/detail`;
             },
             error: function (xhr, status, error) {
                 // Обработка ошибки
