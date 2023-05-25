@@ -21,7 +21,7 @@ class Comments extends React.Component {
 
         this.idUser = getCookie('idUser');
 
-        this.socket = io('http://localhost:3000', {
+        this.socket = io('/', {
             query: {
                 // Устанавливаем id новости, он потребуется серверу для назначения комнаты пользователю
                 newsId: this.idNews,
