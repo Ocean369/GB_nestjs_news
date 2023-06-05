@@ -6,6 +6,7 @@ import { NewsEntity } from './news.entity';
 import { CreateNewsDto } from './dtos/create-news-dto';
 import { UsersService } from '../users/users.service';
 import { CommentsService } from './comments/comments.service';
+import { CacheService } from '../cache/cache.service';
 
 export interface News {
     id?: number;
@@ -37,7 +38,8 @@ export class NewsService {
         private newsRepository: Repository<NewsEntity>,
         private userService: UsersService,
         @Inject(forwardRef(() => CommentsService))
-        private commentsService: CommentsService
+        private commentsService: CommentsService,
+        private cacheService: CacheService
     ) { }
 
     async create(news: CreateNewsDto): Promise<NewsEntity> {
@@ -56,7 +58,21 @@ export class NewsService {
     }
 
     async getAll(): Promise<NewsEntity[] | undefined> {
-        return await this.newsRepository.find();
+        const cacheKey = 'news';
+        // Проверяем, есть ли данные в кэше
+        const cachedNews = await this.cacheService.getFromCache(cacheKey);
+
+        if (cachedNews) {
+            // Возвращаем данные из кэша
+            return cachedNews;
+        }
+        // Если данных нет в кэше, выполняем логику получения новостей
+        const _news = await this.newsRepository.find();
+        // Сохраняем полученные новости в кэше
+        await this.cacheService.createCache(cacheKey, _news, 3600); // Например, кэш на 1 час
+
+        // Возвращаем новости
+        return _news;
     }
 
     async sortAllByUserId(idUser: number): Promise<NewsEntity[] | undefined> {

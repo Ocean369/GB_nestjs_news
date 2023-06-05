@@ -9,6 +9,7 @@ import { UsersModule } from '../users/users.module';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from '../auth/role/roles.guard';
 import { AuthModule } from '../auth/auth.module';
+import { CacheModule } from '../cache/cache.module';
 
 
 @Module({
@@ -20,6 +21,7 @@ import { AuthModule } from '../auth/auth.module';
     },],
   imports: [
     forwardRef(() => CommentsModule),
+    CacheModule,
     MailModule,
     UsersModule,
     AuthModule,

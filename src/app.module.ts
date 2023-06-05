@@ -11,6 +11,7 @@ import { CommentsModule } from './news/comments/comments.module';
 import { AuthModule } from './auth/auth.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ConfigModule } from '@nestjs/config';
+import { CacheModule } from './cache/cache.module';
 
 @Module({
   imports: [
@@ -33,7 +34,8 @@ import { ConfigModule } from '@nestjs/config';
     CommentsModule,
     AuthModule,
     EventEmitterModule.forRoot(),
-    ConfigModule.forRoot()],
+    ConfigModule.forRoot(),
+    CacheModule],
   controllers: [AppController],
   providers: [AppService],
 })
